@@ -205,9 +205,3 @@ Sprawdzane przez:
 ## 🤝 Contributing
 
 Na razie projekt rozwijany prywatnie, ale można forkować i testować.
-
----
-
-## 📄 License
-
-MIT (lub dowolna, którą wybierzesz)
