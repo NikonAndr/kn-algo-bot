@@ -1,5 +1,6 @@
 import smtplib
 import time
+from datetime import datetime
 from email.message import EmailMessage
 from config import EMAIL_ADDRESS, EMAIL_PASSWORD
 
@@ -25,7 +26,8 @@ def send_weekly_notes(emails, notes):
     msg = ""
 
     for note in notes:
-        msg += f"Tytuł: {note[1]}\nAutor: {note[4]}\n{note[2]}\nData: {note[6]}\n\n"
+        created_at = datetime.strptime(note[6], "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%d %H:%M")
+        msg += f"Tytuł: {note[1]}\nAutor: {note[4]}\n{note[2]}\nData: {created_at}\n\n"
 
     if msg:
         send_bulk_email(emails, "Weekly Notes", msg)
