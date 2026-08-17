@@ -1,7 +1,7 @@
 from database import weekly_notes
 
 def create_note(title, content, author_id, author_name):
-    weekly_notes.create_note(title, content, author_id, author_name)
+    return weekly_notes.create_note(title, content, author_id, author_name)
 
 def get_user_notes(author_id):
     return weekly_notes.get_notes_by_author(author_id)
@@ -40,6 +40,20 @@ def toggle_status(note_id):
     weekly_notes.set_status(note_id, new_status)
 
     return new_status
+
+def delete_note(note_id):
+
+    note = weekly_notes.get_note(note_id)
+
+    if not note:
+        return False
+
+    weekly_notes.delete_note(note_id)
+
+    return True
+
+def approve_all_notes(author_id):
+    weekly_notes.approve_all_drafts(author_id)
 
 def get_notes_to_send():
     return weekly_notes.get_approved_notes()

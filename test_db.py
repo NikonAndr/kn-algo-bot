@@ -7,20 +7,20 @@ from database.subscribers import (
 
 init_db()
 
-print("Dodawanie maili")
+print("Adding emails")
 
 print(add_subscriber("test1@gmail.com"))
 print(add_subscriber("test2@gmail.com"))
-print(add_subscriber("test1@gmail.com"))  # duplikat
+print(add_subscriber("test1@gmail.com"))  # duplicate
 
-print("\nLista subskrybentów")
+print("\nSubscriber list")
 
 print(get_subscribers())
 
-print("\nUsuwanie")
+print("\nRemoving")
 
 print(remove_subscriber("test1@gmail.com"))
 
-print("\nLista po usunięciu")
+print("\nList after removal")
 
 print(get_subscribers())

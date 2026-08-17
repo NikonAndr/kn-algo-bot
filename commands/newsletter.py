@@ -13,19 +13,19 @@ class Newsletter(commands.Cog):
     async def subscribe(self, ctx, email: str, list_type: str = "newsletter"):
 
         if not is_valid_email(email):
-            await ctx.send("Niepoprawny Adres Email")
+            await ctx.send("Invalid email address")
             return
 
         if list_type not in ("newsletter", "weekly_notes"):
-            await ctx.send("Niepoprawna lista. Użyj: newsletter lub weekly_notes")
+            await ctx.send("Invalid list. Use: newsletter or weekly_notes")
             return
 
         success = add_subscriber(email, list_type)
 
         if success:
-            await ctx.send(f"{email} został zapisany do listy {list_type}")
+            await ctx.send(f"{email} has been added to the {list_type} list")
         else:
-            await ctx.send(f"{email} juź instnieje w bazie")
+            await ctx.send(f"{email} already exists in the database")
 
     @commands.command()
     async def unsubscribe(self, ctx, email: str, list_type: str = "newsletter"):
@@ -33,9 +33,9 @@ class Newsletter(commands.Cog):
         success = remove_subscriber(email, list_type)
 
         if success:
-            await ctx.send(f"{email} został usunięty z listy {list_type}")
+            await ctx.send(f"{email} has been removed from the {list_type} list")
         else:
-            await ctx.send(f"{email} nie istnieje w bazie")
+            await ctx.send(f"{email} does not exist in the database")
 
     @commands.command()
     async def subscribers(self, ctx):
@@ -52,7 +52,7 @@ class Newsletter(commands.Cog):
 
         send_bulk_email(emails, title, message)
 
-        await ctx.send("Newsletter pomyślnie wysłany!")
+        await ctx.send("Newsletter sent successfully!")
 
         
 async def setup(bot):

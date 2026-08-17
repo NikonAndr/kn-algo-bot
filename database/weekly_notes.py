@@ -11,8 +11,12 @@ def create_note(title, content, author_id, author_name):
         (title, content, author_id, author_name, warsaw_now())
     )
 
+    note_id = cursor.lastrowid
+
     conn.commit()
     conn.close()
+
+    return note_id
 
 def get_notes_by_author(author_id):
 
@@ -65,6 +69,32 @@ def set_status(note_id, status):
     cursor.execute(
         "UPDATE weekly_notes SET status = ? WHERE id = ?",
         (status, note_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+def delete_note(note_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM weekly_notes WHERE id = ?",
+        (note_id, )
+    )
+
+    conn.commit()
+    conn.close()
+
+def approve_all_drafts(author_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE weekly_notes SET status = 'approved' WHERE author_id = ? AND status = 'draft'",
+        (author_id, )
     )
 
     conn.commit()

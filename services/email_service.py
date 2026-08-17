@@ -27,7 +27,7 @@ def send_weekly_notes(emails, notes):
 
     for note in notes:
         created_at = datetime.strptime(note[6], "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%d %H:%M")
-        msg += f"Tytuł: {note[1]}\nAutor: {note[4]}\n{note[2]}\nData: {created_at}\n\n"
+        msg += f"Title: {note[1]}\nAuthor: {note[4]}\n{note[2]}\nDate: {created_at}\n\n"
 
     if msg:
         send_bulk_email(emails, "Weekly Notes", msg)

@@ -17,12 +17,12 @@ class Scheduler(commands.Cog):
 
         payload = {
             "channel_id": ctx.channel.id,
-            "message": "⏰ Scheduler działa!"
+            "message": "⏰ Scheduler is working!"
         }
 
         add_task("send_message", payload, run_time)
 
-        await ctx.send("Zaplanowano wiadomość za minutę")
+        await ctx.send("Message scheduled in one minute")
 
 async def setup(bot):
     await bot.add_cog(Scheduler(bot))
