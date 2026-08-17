@@ -1,4 +1,5 @@
 from database.db import get_connection
+from utils.time_helpers import warsaw_now
 
 def create_note(title, content, author_id, author_name):
 
@@ -6,8 +7,8 @@ def create_note(title, content, author_id, author_name):
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO weekly_notes(title, content, author_id, author_name) VALUES (?, ?, ?, ?)",
-        (title, content, author_id, author_name)
+        "INSERT OR IGNORE INTO weekly_notes(title, content, author_id, author_name, created_at) VALUES (?, ?, ?, ?, ?)",
+        (title, content, author_id, author_name, warsaw_now())
     )
 
     conn.commit()
@@ -49,8 +50,8 @@ def update_note(note_id, title, content):
     cursor = conn.cursor()
 
     cursor.execute(
-        "UPDATE weekly_notes SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        (title, content, note_id)
+        "UPDATE weekly_notes SET title = ?, content = ?, updated_at = ? WHERE id = ?",
+        (title, content, warsaw_now(), note_id)
     )
 
     conn.commit()

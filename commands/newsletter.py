@@ -10,26 +10,30 @@ class Newsletter(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def subscribe(self, ctx, email: str):
+    async def subscribe(self, ctx, email: str, list_type: str = "newsletter"):
 
         if not is_valid_email(email):
             await ctx.send("Niepoprawny Adres Email")
             return
 
-        success = add_subscriber(email)
+        if list_type not in ("newsletter", "weekly_notes"):
+            await ctx.send("Niepoprawna lista. Użyj: newsletter lub weekly_notes")
+            return
+
+        success = add_subscriber(email, list_type)
 
         if success:
-            await ctx.send(f"{email} został zapisany do Przypominania o Eventach")
+            await ctx.send(f"{email} został zapisany do listy {list_type}")
         else:
             await ctx.send(f"{email} juź instnieje w bazie")
 
     @commands.command()
-    async def unsubscribe(self, ctx, email: str):
+    async def unsubscribe(self, ctx, email: str, list_type: str = "newsletter"):
 
-        success = remove_subscriber(email)
+        success = remove_subscriber(email, list_type)
 
         if success:
-            await ctx.send(f"{email} został usunięty z bazy Przypominania o Eventach")
+            await ctx.send(f"{email} został usunięty z listy {list_type}")
         else:
             await ctx.send(f"{email} nie istnieje w bazie")
 
@@ -46,9 +50,8 @@ class Newsletter(commands.Cog):
 
         emails = get_subscribers("newsletter")
 
-        for email in emails:
-            send_bulk_email(email, title, message)
-        
+        send_bulk_email(emails, title, message)
+
         await ctx.send("Newsletter pomyślnie wysłany!")
 
         

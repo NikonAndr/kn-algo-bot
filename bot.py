@@ -15,6 +15,11 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"Zalogowano jako {bot.user}")
 
+@bot.event
+async def on_command_error(ctx, error):
+    print(f"Command error in {ctx.command}: {error}")
+    await ctx.send(f"⚠️ Błąd: {error}")
+
 async def main():
 
     init_db()

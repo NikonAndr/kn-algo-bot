@@ -23,11 +23,9 @@ def send_bulk_email(emails, subject, content):
 
 def send_weekly_notes(emails, notes):
     msg = ""
-    
+
     for note in notes:
-        msg += f"Tytuł: {note.title} \n Autor: {note.author}\n {note.content} \n Data {note.created_at}\n\n"
+        msg += f"Tytuł: {note[1]}\nAutor: {note[4]}\n{note[2]}\nData: {note[6]}\n\n"
 
     if msg:
         send_bulk_email(emails, "Weekly Notes", msg)
-
-    

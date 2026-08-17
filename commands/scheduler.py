@@ -1,8 +1,9 @@
 from discord.ext import commands
 from services.scheduler_service import SchedulerService
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from database.scheduled_tasks import add_task
+from utils.time_helpers import warsaw_now
 
 class Scheduler(commands.Cog):
 
@@ -12,7 +13,7 @@ class Scheduler(commands.Cog):
 
     @commands.command()
     async def schedule_test(self, ctx):
-        run_time = datetime.utcnow() + timedelta(minutes=1)
+        run_time = warsaw_now() + timedelta(minutes=1)
 
         payload = {
             "channel_id": ctx.channel.id,
