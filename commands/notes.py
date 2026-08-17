@@ -61,10 +61,13 @@ class CreateNoteModal(discord.ui.Modal, title="Create Weekly Note"):
             errors.append(f"Content is {word_count(content)} words (max 400).")
 
         if errors:
+            view = SelfCleaningView(timeout=180)
             await interaction.response.send_message(
                 "\n".join(errors),
-                ephemeral=True
+                ephemeral=True,
+                view=view
             )
+            view.message = await interaction.original_response()
             return
 
         author_id = interaction.user.id
@@ -119,10 +122,13 @@ class EditNoteModal(discord.ui.Modal, title="Edit Note"):
             errors.append(f"Content is {word_count(content)} words (max 400).")
 
         if errors:
+            view = SelfCleaningView(timeout=180)
             await interaction.response.send_message(
                 "\n".join(errors),
-                ephemeral=True
+                ephemeral=True,
+                view=view
             )
+            view.message = await interaction.original_response()
             return
 
         notes_service.edit_note(
@@ -133,10 +139,13 @@ class EditNoteModal(discord.ui.Modal, title="Edit Note"):
 
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.send_message(
             f"Note updated!\n\n{format_notes_list(notes)}",
-            ephemeral=True
+            ephemeral=True,
+            view=view
         )
+        view.message = await interaction.original_response()
 
 class EditNoteDropdown(discord.ui.Select):
 
@@ -197,10 +206,12 @@ class StatusNoteDropdown(discord.ui.Select):
         note = notes_service.get_note(note_id)
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.edit_message(
             content=f"Status changed to **{note[5]}**\n\n{format_notes_list(notes)}",
-            view=None
+            view=view
         )
+        view.message = interaction.message
     
 class DeleteNoteDropdown(discord.ui.Select):
 
@@ -251,10 +262,12 @@ class ConfirmDeleteButton(discord.ui.Button):
 
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.edit_message(
             content=f"Note deleted 🗑️\n\n{format_notes_list(notes)}",
-            view=None
+            view=view
         )
+        view.message = interaction.message
 
 class CancelDeleteButton(discord.ui.Button):
 
@@ -268,10 +281,12 @@ class CancelDeleteButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.edit_message(
             content="Deletion cancelled",
-            view=None
+            view=view
         )
+        view.message = interaction.message
 
 class ConfirmDeleteView(SelfCleaningView):
 
@@ -318,10 +333,12 @@ class ApproveButton(discord.ui.Button):
 
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.edit_message(
             content=f"Note approved ✅\n\n{format_notes_list(notes)}",
-            view=None
+            view=view
         )
+        view.message = interaction.message
 
 class KeepDraftButton(discord.ui.Button):
 
@@ -337,10 +354,12 @@ class KeepDraftButton(discord.ui.Button):
 
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.edit_message(
             content=f"Note saved as draft 📝\n\n{format_notes_list(notes)}",
-            view=None
+            view=view
         )
+        view.message = interaction.message
 
 class ApproveDraftView(SelfCleaningView):
 
@@ -445,10 +464,13 @@ class ApproveAllButton(discord.ui.Button):
 
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        view = SelfCleaningView(timeout=180)
         await interaction.response.send_message(
             f"All drafts have been approved ✅\n\n{format_notes_list(notes)}",
-            ephemeral=True
+            ephemeral=True,
+            view=view
         )
+        view.message = await interaction.original_response()
         await interaction.message.delete()
 
 class CreateMenuView(SelfCleaningView):
