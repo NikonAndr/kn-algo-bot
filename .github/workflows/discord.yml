@@ -11,3 +11,4 @@ jobs:
           curl -H "Content-Type: application/json" \
             -d "{\"content\": \"PR event: ${{ github.event.action }} — ${{ github.event.pull_request.title }}\"}" \
             "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
