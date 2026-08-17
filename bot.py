@@ -15,6 +15,14 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"Logged in as {bot.user}")
 
+    for guild in bot.guilds:
+        bot.tree.copy_global_to(guild=guild)
+        await bot.tree.sync(guild=guild)
+
+@bot.event
+async def on_message(message):
+    pass
+
 @bot.event
 async def on_command_error(ctx, error):
     print(f"Command error in {ctx.command}: {error}")

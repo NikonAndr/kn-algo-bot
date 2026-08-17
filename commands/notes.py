@@ -494,7 +494,7 @@ class Notes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.hybrid_command()
     async def note(self, ctx):
 
         user_notes = notes_service.get_user_notes(ctx.author.id)

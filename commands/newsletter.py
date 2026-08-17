@@ -1,3 +1,5 @@
+import typing
+
 from discord.ext import commands
 from database.subscribers import add_subscriber, remove_subscriber, get_subscribers
 from utils.validators import is_valid_email
@@ -5,12 +7,12 @@ from utils import checks
 from services.email_service import send_bulk_email
 
 class Newsletter(commands.Cog):
-    
+
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def subscribe(self, ctx, email: str, list_type: str = "newsletter"):
+    @commands.hybrid_command()
+    async def subscribe(self, ctx, email: str, list_type: typing.Literal["newsletter", "weekly_notes"] = "newsletter"):
 
         if not is_valid_email(email):
             await ctx.send("Invalid email address")
@@ -27,8 +29,8 @@ class Newsletter(commands.Cog):
         else:
             await ctx.send(f"{email} already exists in the database")
 
-    @commands.command()
-    async def unsubscribe(self, ctx, email: str, list_type: str = "newsletter"):
+    @commands.hybrid_command()
+    async def unsubscribe(self, ctx, email: str, list_type: typing.Literal["newsletter", "weekly_notes"] = "newsletter"):
 
         success = remove_subscriber(email, list_type)
 
@@ -37,7 +39,7 @@ class Newsletter(commands.Cog):
         else:
             await ctx.send(f"{email} does not exist in the database")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def subscribers(self, ctx):
 
         newsletter = get_subscribers("newsletter")
@@ -45,7 +47,7 @@ class Newsletter(commands.Cog):
 
         await ctx.send(f"Subscribers\nNewsletter: {len(newsletter)}\nWeekly Notes: {len(weekly_notes)}")
 
-    @commands.command()
+    @commands.hybrid_command()
     async def send_newsletter(self, ctx, title: str, message: str):
 
         emails = get_subscribers("newsletter")

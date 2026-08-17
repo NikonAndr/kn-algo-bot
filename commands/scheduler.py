@@ -11,7 +11,7 @@ class Scheduler(commands.Cog):
         self.bot = bot
         self.scheduler = SchedulerService(bot)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def schedule_test(self, ctx):
         run_time = warsaw_now() + timedelta(minutes=1)
 
