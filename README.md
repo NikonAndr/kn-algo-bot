@@ -3,6 +3,7 @@
 Bot Discord stworzony do zarządzania kołem naukowym (~30 osób).  
 Obsługuje newslettery, przypomnienia, weekly notes oraz automatyczne wysyłki maili.
 
+
 ---
 
 ## 🚀 Funkcjonalności
