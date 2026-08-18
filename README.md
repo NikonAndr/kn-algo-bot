@@ -5,6 +5,7 @@ Obsługuje newslettery, przypomnienia, weekly notes oraz automatyczne wysyłki m
 
 ---
 
+
 ## 🚀 Funkcjonalności
 
 - 📧 System newsletterów email (SMTP – Gmail)
