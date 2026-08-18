@@ -5,6 +5,7 @@ Obsługuje newslettery, przypomnienia, weekly notes oraz automatyczne wysyłki m
 
 ---
 
+
 ## 🚀 Funkcjonalności
 
 - 📧 System newsletterów email (SMTP – Gmail)
@@ -15,7 +16,6 @@ Obsługuje newslettery, przypomnienia, weekly notes oraz automatyczne wysyłki m
 - 🎛️ UI na Discordzie (buttons, modals, dropdowns)
 
 ---
-
 ## 🧱 Architektura
 
 Projekt oparty o podejście warstwowe:
