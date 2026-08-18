@@ -15,7 +15,6 @@ Obsługuje newslettery, przypomnienia, weekly notes oraz automatyczne wysyłki m
 - 🎛️ UI na Discordzie (buttons, modals, dropdowns)
 
 ---
-
 ## 🧱 Architektura
 
 Projekt oparty o podejście warstwowe:
