@@ -42,5 +42,15 @@ def init_db():
     )               
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS notified_events (
+        repo TEXT,
+        pr_number INTEGER,
+        event_type TEXT,
+        notified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (repo, pr_number, event_type)
+    )
+    """)
+
     conn.commit()
     conn.close()
