@@ -1,4 +1,5 @@
 from database.db import get_connection
+from utils.time_helpers import warsaw_now
 
 def is_notified(repo, pr_number, event_type):
 
@@ -22,8 +23,8 @@ def mark_notified(repo, pr_number, event_type):
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT OR IGNORE INTO notified_events(repo, pr_number, event_type) VALUES (?, ?, ?)",
-        (repo, pr_number, event_type)
+        "INSERT OR IGNORE INTO notified_events(repo, pr_number, event_type, notified_at) VALUES (?, ?, ?, ?)",
+        (repo, pr_number, event_type, warsaw_now())
     )
 
     conn.commit()
