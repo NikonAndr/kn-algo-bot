@@ -52,5 +52,31 @@ def init_db():
     )
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        google_event_id TEXT UNIQUE,
+        title TEXT NOT NULL,
+        description TEXT,
+        start_time TIMESTAMP NOT NULL,
+        end_time TIMESTAMP,
+        event_type TEXT DEFAULT 'other',
+        source TEXT NOT NULL,
+        created_by INTEGER,
+        status TEXT DEFAULT 'active'
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS event_reminders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id INTEGER NOT NULL,
+        offset_minutes INTEGER NOT NULL,
+        exec_time TIMESTAMP NOT NULL,
+        sent INTEGER DEFAULT 0,
+        FOREIGN KEY (event_id) REFERENCES events(id)
+    )
+    """)
+
     conn.commit()
     conn.close()

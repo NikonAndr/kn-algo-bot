@@ -238,6 +238,17 @@ class DeleteNoteDropdown(discord.ui.Select):
         note_id = int(self.values[0])
         note = notes_service.get_note(note_id)
 
+        if not note:
+            notes = notes_service.get_user_notes(interaction.user.id)
+            view = SelfCleaningView(timeout=180)
+            await interaction.response.edit_message(
+                content=f"That note was already deleted.\n\n{format_notes_list(notes)}",
+                view=view
+            )
+            view.message = interaction.message
+            self.view.stop()
+            return
+
         view = ConfirmDeleteView(note_id)
 
         await interaction.response.edit_message(
@@ -245,6 +256,7 @@ class DeleteNoteDropdown(discord.ui.Select):
             view=view
         )
         view.message = interaction.message
+        self.view.stop()
 
 class ConfirmDeleteButton(discord.ui.Button):
 
@@ -258,16 +270,19 @@ class ConfirmDeleteButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
 
-        notes_service.delete_note(self.note_id)
+        deleted = notes_service.delete_note(self.note_id)
 
         notes = notes_service.get_user_notes(interaction.user.id)
 
+        message = f"Note deleted 🗑️\n\n{format_notes_list(notes)}" if deleted else f"That note was already deleted.\n\n{format_notes_list(notes)}"
+
         view = SelfCleaningView(timeout=180)
         await interaction.response.edit_message(
-            content=f"Note deleted 🗑️\n\n{format_notes_list(notes)}",
+            content=message,
             view=view
         )
         view.message = interaction.message
+        self.view.stop()
 
 class CancelDeleteButton(discord.ui.Button):
 
@@ -287,6 +302,7 @@ class CancelDeleteButton(discord.ui.Button):
             view=view
         )
         view.message = interaction.message
+        self.view.stop()
 
 class ConfirmDeleteView(SelfCleaningView):
 

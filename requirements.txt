@@ -2,3 +2,6 @@ discord.py
 python-dotenv
 tzdata
 aiohttp
+google-api-python-client
+google-auth
+pytest

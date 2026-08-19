@@ -2,7 +2,7 @@ import json
 from datetime import timedelta
 from discord.ext import tasks
 
-from config import WEEKLY_SEND_INTERVAL_MINUTES
+from config import WEEKLY_SEND_INTERVAL_MINUTES, CALENDAR_UPDATES_CHANNEL_ID, MEMBER_ROLE_ID
 from database.scheduled_tasks import (
     add_task,
     get_due_tasks,
@@ -10,8 +10,25 @@ from database.scheduled_tasks import (
     mark_task_done,
 )
 from database.subscribers import get_subscribers
+from database.events import get_due_reminders, mark_reminder_sent
 from services import email_service, notes_service
-from utils.time_helpers import warsaw_now
+from utils.time_helpers import warsaw_now, parse_naive_timestamp
+
+
+REMINDER_GRACE_MINUTES = 2
+
+
+def is_within_grace(now, exec_time, grace_minutes=REMINDER_GRACE_MINUTES):
+    late_by_minutes = (now - exec_time).total_seconds() / 60
+    return late_by_minutes <= grace_minutes
+
+
+def format_offset(offset_minutes):
+    if offset_minutes % 1440 == 0:
+        return f"{offset_minutes // 1440} day(s)"
+    if offset_minutes % 60 == 0:
+        return f"{offset_minutes // 60} hour(s)"
+    return f"{offset_minutes} minute(s)"
 
 
 def next_weekly_send_time():
@@ -34,6 +51,20 @@ class SchedulerService:
 
     @tasks.loop(seconds=30)
     async def scheduler_loop(self):
+
+        if CALENDAR_UPDATES_CHANNEL_ID:
+            channel = self.bot.get_channel(int(CALENDAR_UPDATES_CHANNEL_ID))
+            now = warsaw_now()
+
+            for reminder_id, offset_minutes, title, start_time, exec_time in get_due_reminders():
+                if is_within_grace(now, parse_naive_timestamp(exec_time)) and channel:
+                    role_mention = f"<@&{MEMBER_ROLE_ID}> " if MEMBER_ROLE_ID else ""
+                    formatted_start = parse_naive_timestamp(start_time).strftime("%d %b %H:%M")
+                    await channel.send(
+                        f"{role_mention}⏰ Reminder: **{title}** starts in {format_offset(offset_minutes)}! ({formatted_start})"
+                    )
+
+                mark_reminder_sent(reminder_id)
 
         tasks = get_due_tasks()
 

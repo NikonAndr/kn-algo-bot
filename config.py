@@ -18,3 +18,8 @@ GH_UPDATES_CHANNEL_ID = os.getenv("GH_UPDATES_CHANNEL_ID")
 GITHUB_TRACKED_REPOS = [
     repo.strip() for repo in os.getenv("GITHUB_TRACKED_REPOS", "").split(",") if repo.strip()
 ]
+
+GOOGLE_SERVICE_ACCOUNT_FILE = os.getenv("GOOGLE_SERVICE_ACCOUNT_FILE", "credentials/google-service-account.json")
+GOOGLE_CALENDAR_ID = os.getenv("GOOGLE_CALENDAR_ID")
+CALENDAR_UPDATES_CHANNEL_ID = os.getenv("CALENDAR_UPDATES_CHANNEL_ID")
+DEFAULT_EVENT_REMINDER_MINUTES = int(os.getenv("DEFAULT_EVENT_REMINDER_MINUTES", "60"))
