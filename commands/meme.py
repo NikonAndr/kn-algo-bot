@@ -2,6 +2,7 @@ import discord
 import os
 import random
 from discord.ext import commands
+from utils import checks
 
 MEMES_DIR = "memes"
 IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".webp")
@@ -12,6 +13,7 @@ class Meme(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(description="Posts a random meme")
+    @checks.member_only()
     async def meme(self, ctx):
         memes = [f for f in os.listdir(MEMES_DIR) if f.lower().endswith(IMAGE_EXTENSIONS)]
 

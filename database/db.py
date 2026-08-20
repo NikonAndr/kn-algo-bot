@@ -12,10 +12,8 @@ def init_db():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS subscribers (
-        email TEXT,
-        list_type TEXT,
-        PRIMARY KEY (email, list_type)
-    )               
+        email TEXT PRIMARY KEY
+    )
     """)
 
     cursor.execute("""

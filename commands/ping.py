@@ -6,8 +6,8 @@ class Ping(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command()
-    @checks.notes_manager_only()
+    @commands.hybrid_command(description="Checks if the bot is responsive")
+    @checks.member_only()
     async def ping(self, ctx):
         await ctx.send("Pong!")
 

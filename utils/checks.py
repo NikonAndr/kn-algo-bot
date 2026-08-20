@@ -7,10 +7,10 @@ def bot_admin_only():
     
     return commands.check(predicate)
 
-def notes_manager_only():
+def team_lead_only():
     async def predicate(ctx):
-        return permission_service.can_manage_notes(ctx.author)
-    
+        return permission_service.is_team_lead(ctx.author)
+
     return commands.check(predicate)
 
 def member_only():

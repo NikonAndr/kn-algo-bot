@@ -81,7 +81,7 @@ class SchedulerService:
                 notes = notes_service.get_notes_to_send()
 
                 if notes:
-                    recipients = get_subscribers("weekly_notes")
+                    recipients = get_subscribers()
                     email_service.send_weekly_notes(recipients, notes)
                     notes_service.mark_notes_sent(notes)
 

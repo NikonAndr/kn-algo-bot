@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from services import notes_service
+from utils import checks
 
 def word_count(text):
     return len(text.split())
@@ -45,10 +46,6 @@ class CreateNoteModal(discord.ui.Modal, title="Create Weekly Note"):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        print("DISPLAY:", interaction.user.display_name)
-        print("USERNAME:", interaction.user.name)
-        print("NICK:", interaction.user.nick)
-
         title = self.title_input.value
         content = self.content_input.value
 
@@ -510,7 +507,8 @@ class Notes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.hybrid_command()
+    @commands.hybrid_command(description="Create, edit, approve, or delete your weekly notes")
+    @checks.team_lead_only()
     async def note(self, ctx):
 
         user_notes = notes_service.get_user_notes(ctx.author.id)

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from services import horoscope_service
+from utils import checks
 
 ZODIAC_SIGNS = [
     ("Aries", "♈"),
@@ -69,6 +70,7 @@ class Horoscope(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(description="Get your daily horoscope")
+    @checks.member_only()
     async def horoscope(self, ctx):
         view = ZodiacView()
         sent_message = await ctx.send("Pick your zodiac sign:", view=view, ephemeral=True)

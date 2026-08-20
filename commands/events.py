@@ -424,13 +424,13 @@ class Events(commands.Cog):
         self.poller.poll_loop.cancel()
 
     @commands.hybrid_command(name="create-event", description="Creates an event in the Google Calendar")
-    @checks.bot_admin_only()
+    @checks.member_only()
     async def create_event(self, ctx):
         modal = CreateEventModal()
         await ctx.interaction.response.send_modal(modal)
 
     @commands.hybrid_command(name="events", description="Lists upcoming events from the Google Calendar")
-    @checks.bot_admin_only()
+    @checks.member_only()
     async def list_events(self, ctx):
         upcoming = events_db.get_upcoming_events(limit=10)
 
