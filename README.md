@@ -20,6 +20,7 @@ Obsługuje newslettery, przypomnienia, weekly notes oraz automatyczne wysyłki m
 
 Projekt oparty o podejście warstwowe:
 
+
 ```
 commands → services → database
 ```
