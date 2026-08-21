@@ -2,11 +2,12 @@ import aiohttp
 from datetime import datetime, timedelta, timezone
 from discord.ext import tasks
 
-from config import GITHUB_TOKEN, GH_UPDATES_CHANNEL_ID, GITHUB_TRACKED_REPOS
+from config import GITHUB_TOKEN, GH_UPDATES_CHANNEL_ID, GITHUB_ORG
 from database.github_events import is_notified, mark_notified, has_any_events
 
 GITHUB_API_URL = "https://api.github.com"
 STALE_EVENT_THRESHOLD = timedelta(hours=24)
+ORG_REPOS_REFRESH_INTERVAL = timedelta(minutes=5)
 
 
 def parse_github_time(value):
@@ -18,10 +19,52 @@ class GithubPollService:
     def __init__(self, bot):
         self.bot = bot
         self.session = None
+        self.tracked_repos = []
+        self.repos_last_refreshed = None
         self.poll_loop.start()
 
     def cog_unload(self):
         self.poll_loop.cancel()
+
+    async def get_org_repos(self):
+        headers = {
+            "Authorization": f"Bearer {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json",
+        }
+
+        repos = []
+        page = 1
+
+        while True:
+            url = f"{GITHUB_API_URL}/orgs/{GITHUB_ORG}/repos?per_page=100&page={page}"
+
+            async with self.session.get(url, headers=headers) as resp:
+                if resp.status != 200:
+                    print(f"Failed to list repos for org '{GITHUB_ORG}': HTTP {resp.status}")
+                    return None
+
+                batch = await resp.json()
+
+            repos.extend(repo["full_name"] for repo in batch)
+
+            if len(batch) < 100:
+                break
+
+            page += 1
+
+        return repos
+
+    async def refresh_tracked_repos(self):
+        now = datetime.now(timezone.utc)
+
+        if self.repos_last_refreshed and (now - self.repos_last_refreshed) < ORG_REPOS_REFRESH_INTERVAL:
+            return
+
+        repos = await self.get_org_repos()
+
+        if repos is not None:
+            self.tracked_repos = repos
+            self.repos_last_refreshed = now
 
     async def get_pull_requests(self, full_name):
         headers = {
@@ -71,7 +114,9 @@ class GithubPollService:
 
         channel = self.bot.get_channel(int(GH_UPDATES_CHANNEL_ID)) if GH_UPDATES_CHANNEL_ID else None
 
-        for full_name in GITHUB_TRACKED_REPOS:
+        await self.refresh_tracked_repos()
+
+        for full_name in self.tracked_repos:
             seeded = has_any_events(full_name)
 
             pulls = await self.get_pull_requests(full_name)

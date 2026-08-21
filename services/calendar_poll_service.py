@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from discord.ext import tasks
+from googleapiclient.errors import HttpError
 
 from config import DEFAULT_EVENT_REMINDER_MINUTES
 from database.events import (
@@ -35,7 +36,12 @@ class CalendarPollService:
     async def poll_loop(self):
 
         now = warsaw_now()
-        items = calendar_service.list_events(now, now + timedelta(days=90))
+
+        try:
+            items = calendar_service.list_events(now, now + timedelta(days=90))
+        except HttpError as error:
+            print(f"Calendar poll skipped, couldn't reach Google Calendar: {error}")
+            return
 
         for item in items:
             google_event_id = item["id"]

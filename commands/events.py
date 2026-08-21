@@ -1,6 +1,7 @@
 import discord
 from datetime import datetime, timedelta
 from discord.ext import commands
+from googleapiclient.errors import HttpError
 from utils import checks
 from database import events as events_db
 from services import calendar_service
@@ -36,6 +37,15 @@ class SelfCleaningView(discord.ui.View):
                 await self.message.delete()
             except discord.NotFound:
                 pass
+
+async def send_calendar_unavailable_message(interaction, view_to_stop):
+    cleanup_view = SelfCleaningView(timeout=60)
+    await interaction.edit_original_response(
+        content="⚠️ Couldn't reach Google Calendar — access may not be fully set up yet. Try again shortly.",
+        view=cleanup_view
+    )
+    cleanup_view.message = interaction.message
+    view_to_stop.stop()
 
 class CreateEventModal(discord.ui.Modal, title="Create Event"):
 
@@ -178,9 +188,14 @@ class ConfirmCreateEventButton(discord.ui.Button):
 
         await interaction.response.defer()
 
-        google_event_id = calendar_service.create_event(
-            view.event_title, view.event_description, view.start_time, view.end_time
-        )
+        try:
+            google_event_id = calendar_service.create_event(
+                view.event_title, view.event_description, view.start_time, view.end_time
+            )
+        except HttpError as error:
+            print(f"Failed to create calendar event: {error}")
+            await send_calendar_unavailable_message(interaction, self.view)
+            return
 
         event_id = events_db.create_event(
             google_event_id, view.event_title, view.event_description,
@@ -334,7 +349,13 @@ class ConfirmDeleteEventButton(discord.ui.Button):
             self.view.stop()
             return
 
-        calendar_service.delete_event(event[1])
+        try:
+            calendar_service.delete_event(event[1])
+        except HttpError as error:
+            print(f"Failed to delete calendar event: {error}")
+            await send_calendar_unavailable_message(interaction, self.view)
+            return
+
         events_db.mark_event_cancelled(self.event_id)
         events_db.cancel_reminders(self.event_id)
 

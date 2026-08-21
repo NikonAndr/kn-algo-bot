@@ -2,7 +2,7 @@ import json
 from datetime import timedelta
 from discord.ext import tasks
 
-from config import WEEKLY_SEND_INTERVAL_MINUTES, CALENDAR_UPDATES_CHANNEL_ID, MEMBER_ROLE_ID
+from config import CALENDAR_UPDATES_CHANNEL_ID, MEMBER_ROLE_ID
 from database.scheduled_tasks import (
     add_task,
     get_due_tasks,
@@ -31,8 +31,19 @@ def format_offset(offset_minutes):
     return f"{offset_minutes} minute(s)"
 
 
+WEEKLY_SEND_WEEKDAY = 6  # Monday=0 ... Sunday=6
+WEEKLY_SEND_HOUR = 18
+
+
 def next_weekly_send_time():
-    return warsaw_now() + timedelta(minutes=WEEKLY_SEND_INTERVAL_MINUTES)
+    now = warsaw_now()
+    days_until = (WEEKLY_SEND_WEEKDAY - now.weekday()) % 7
+    candidate = (now + timedelta(days=days_until)).replace(hour=WEEKLY_SEND_HOUR, minute=0, second=0, microsecond=0)
+
+    if candidate <= now:
+        candidate += timedelta(days=7)
+
+    return candidate
 
 
 class SchedulerService:

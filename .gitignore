@@ -8,3 +8,4 @@ data/database.db
 OPEN_QUESTIONS.md
 credentials/*
 memes/*
+!memes/README.md
