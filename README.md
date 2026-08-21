@@ -61,7 +61,7 @@ All configuration is read from `.env` by `config.py`:
 | Variable | Used for |
 |---|---|
 | `DISCORD_TOKEN` | token generated on the discord dev portal |
-| `BOT_ADMIN_ROLE_ID`, `TEAM_LEAD_ROLE_ID`, `MEMBER_ROLE_ID` | permission tiers (see below) |
+| `BOT_ADMIN_ROLE_ID`, `MANAGEMENT_ROLE_ID`, `MEMBER_ROLE_ID`, `SUPERVISOR_ROLE_ID` | permission tiers (see below) |
 | `GOOGLE_SERVICE_ACCOUNT_FILE`, `GOOGLE_CALENDAR_ID` | Calendar sync (service-account JSON, default path `credentials/google-service-account.json`) |
 | `CALENDAR_UPDATES_CHANNEL_ID` | where to post a calendar updates |
 | `GITHUB_TOKEN`, `GITHUB_ORG`, `GH_UPDATES_CHANNEL_ID` | PR polling |
@@ -69,7 +69,7 @@ All configuration is read from `.env` by `config.py`:
 
 ### Permissions
 
-Three role tiers, checked in `utils/checks.py` / `services/permission_service.py` and mapped to Discord role IDs in `.env`: **member** (baseline - create_event, events, horoscope, meme, ping), **team-lead** (weekly notes management - note) and **bot admin**, which currently gates the subscriber-list commands. Each command declares its required tier with a decorator, so adding a new gated command is a one-line change.
+Four role tiers, checked in `utils/checks.py` / `services/permission_service.py` and mapped to Discord role IDs in `.env`: **member/supervisor** (baseline - create_event, events, horoscope, meme, ping), **team-lead** (weekly notes management - note) and **bot admin**, which currently gates the subscriber-list commands. Each command declares its required tier with a decorator, so adding a new gated command is a one-line change.
 
 ## Tech Stack
 

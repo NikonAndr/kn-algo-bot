@@ -7,9 +7,9 @@ def bot_admin_only():
     
     return commands.check(predicate)
 
-def team_lead_only():
+def management_only():
     async def predicate(ctx):
-        return permission_service.is_team_lead(ctx.author)
+        return permission_service.is_management(ctx.author)
 
     return commands.check(predicate)
 

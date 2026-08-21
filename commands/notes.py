@@ -508,7 +508,7 @@ class Notes(commands.Cog):
         self.bot = bot
 
     @commands.hybrid_command(description="Create, edit, approve, or delete your weekly notes")
-    @checks.team_lead_only()
+    @checks.management_only()
     async def note(self, ctx):
 
         user_notes = notes_service.get_user_notes(ctx.author.id)
