@@ -149,9 +149,13 @@ class GithubPollService:
                 async def build_opened_message(author=author, title=title, reviewers_line=reviewers_line, url=url, full_name=full_name):
                     return f"📢 **{author}** opened a PR in **{full_name}**: {title}\n{reviewers_line}\n{url}"
 
-                await self.handle_event(
-                    channel, full_name, pr, "opened", "created_at", seeded, build_opened_message
-                )
+                # Drafts aren't announced (or recorded) until marked ready for
+                # review. Freshness uses updated_at, which bumps when a draft is
+                # marked ready - created_at may be days old by then.
+                if not pr.get("draft"):
+                    await self.handle_event(
+                        channel, full_name, pr, "opened", "updated_at", seeded, build_opened_message
+                    )
 
                 if pr.get("merged_at"):
                     async def build_merged_message(pr_number=pr["number"], author=author, title=title, url=url, full_name=full_name):
