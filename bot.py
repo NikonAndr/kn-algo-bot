@@ -1,9 +1,13 @@
 import discord 
 from discord.ext import commands
 import asyncio
+import logging
 import os
 from config import TOKEN
 from database.db import init_db
+from utils.logging_setup import setup_logging
+
+log = logging.getLogger("bot")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -16,7 +20,7 @@ bot = commands.Bot(
 
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user}")
+    log.info("Logged in as %s", bot.user)
 
     for guild in bot.guilds:
         bot.tree.copy_global_to(guild=guild)
@@ -28,11 +32,12 @@ async def on_message(message):
 
 @bot.event
 async def on_command_error(ctx, error):
-    print(f"Command error in {ctx.command}: {error}")
+    log.error("Command error in %s: %s", ctx.command, error, exc_info=error)
     await ctx.send(f"⚠️ Error: {error}")
 
 async def main():
 
+    setup_logging()
     init_db()
 
     async with bot:

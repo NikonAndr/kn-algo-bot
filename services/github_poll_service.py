@@ -1,9 +1,13 @@
+import logging
+
 import aiohttp
 from datetime import datetime, timedelta, timezone
 from discord.ext import tasks
 
 from config import GITHUB_TOKEN, GH_UPDATES_CHANNEL_ID, GITHUB_ORG
 from database.github_events import is_notified, mark_notified, has_any_events
+
+log = logging.getLogger(__name__)
 
 GITHUB_API_URL = "https://api.github.com"
 STALE_EVENT_THRESHOLD = timedelta(hours=24)
@@ -40,7 +44,10 @@ class GithubPollService:
 
             async with self.session.get(url, headers=headers) as resp:
                 if resp.status != 200:
-                    print(f"Failed to list repos for org '{GITHUB_ORG}': HTTP {resp.status}")
+                    log.warning(
+                        "Failed to list repos for org %r: HTTP %s %s",
+                        GITHUB_ORG, resp.status, (await resp.text())[:300],
+                    )
                     return None
 
                 batch = await resp.json()
@@ -76,6 +83,10 @@ class GithubPollService:
 
         async with self.session.get(url, headers=headers) as resp:
             if resp.status != 200:
+                log.warning(
+                    "Failed to list PRs for %s: HTTP %s %s",
+                    full_name, resp.status, (await resp.text())[:300],
+                )
                 return []
             return await resp.json()
 
@@ -111,7 +122,13 @@ class GithubPollService:
 
     @tasks.loop(seconds=30)
     async def poll_loop(self):
+        # Keep the loop alive: discord.py stops it for good on most exceptions.
+        try:
+            await self.poll_once()
+        except Exception:
+            log.exception("GitHub poll failed, retrying next cycle")
 
+    async def poll_once(self):
         channel = self.bot.get_channel(int(GH_UPDATES_CHANNEL_ID)) if GH_UPDATES_CHANNEL_ID else None
 
         await self.refresh_tracked_repos()

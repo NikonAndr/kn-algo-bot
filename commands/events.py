@@ -1,12 +1,15 @@
+import logging
+
 import discord
 from datetime import datetime, timedelta
 from discord.ext import commands
-from googleapiclient.errors import HttpError
 from utils import checks
 from database import events as events_db
 from services import calendar_service
 from services.calendar_poll_service import CalendarPollService
 from utils.time_helpers import warsaw_now, parse_naive_timestamp
+
+log = logging.getLogger(__name__)
 
 def next_full_hour():
     return (warsaw_now() + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
@@ -192,8 +195,9 @@ class ConfirmCreateEventButton(discord.ui.Button):
             google_event_id = calendar_service.create_event(
                 view.event_title, view.event_description, view.start_time, view.end_time
             )
-        except HttpError as error:
-            print(f"Failed to create calendar event: {error}")
+        except Exception:
+            # Not just HttpError: network/DNS/auth failures raise other types.
+            log.exception("Failed to create calendar event")
             await send_calendar_unavailable_message(interaction, self.view)
             return
 
@@ -351,8 +355,8 @@ class ConfirmDeleteEventButton(discord.ui.Button):
 
         try:
             calendar_service.delete_event(event[1])
-        except HttpError as error:
-            print(f"Failed to delete calendar event: {error}")
+        except Exception:
+            log.exception("Failed to delete calendar event")
             await send_calendar_unavailable_message(interaction, self.view)
             return
 
