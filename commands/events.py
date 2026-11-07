@@ -23,7 +23,8 @@ def format_events_list(events):
 
     for event in events:
         date = parse_naive_timestamp(event[4]).strftime("%d %b %H:%M")
-        message += f"- {event[2]} ({event[6]}) — {date}\n"
+        location = f" 📍 {event[10]}" if event[10] else ""
+        message += f"- {event[2]} ({event[6]}) — {date}{location}\n"
 
     return message
 
@@ -79,15 +80,24 @@ class CreateEventModal(discord.ui.Modal, title="Create Event"):
             max_length=5
         )
 
+        self.location_input = discord.ui.TextInput(
+            label="Location",
+            placeholder="e.g. D1 sala 311a",
+            max_length=200,
+            required=False
+        )
+
         self.add_item(self.title_input)
         self.add_item(self.description_input)
         self.add_item(self.start_input)
         self.add_item(self.duration_input)
+        self.add_item(self.location_input)
 
     async def on_submit(self, interaction: discord.Interaction):
 
         title = self.title_input.value
         description = self.description_input.value
+        location = self.location_input.value.strip()
 
         errors = []
         start_time = None
@@ -124,7 +134,7 @@ class CreateEventModal(discord.ui.Modal, title="Create Event"):
 
         if is_past or is_far_future:
             reason = "in the past" if is_past else "more than 3 months from now"
-            view = ConfirmSuspiciousDateView(title, description, start_time, end_time, interaction.user.id)
+            view = ConfirmSuspiciousDateView(title, description, start_time, end_time, location, interaction.user.id)
 
             await interaction.response.send_message(
                 f"This event's start time is {reason} ({start_time.strftime('%d %b %Y %H:%M')}). Are you sure?",
@@ -134,7 +144,7 @@ class CreateEventModal(discord.ui.Modal, title="Create Event"):
             view.message = await interaction.original_response()
             return
 
-        view = EventOptionsView(title, description, start_time, end_time, interaction.user.id)
+        view = EventOptionsView(title, description, start_time, end_time, location, interaction.user.id)
 
         await interaction.response.send_message(
             "Pick an event type and reminders, then confirm:",
@@ -193,7 +203,8 @@ class ConfirmCreateEventButton(discord.ui.Button):
 
         try:
             google_event_id = calendar_service.create_event(
-                view.event_title, view.event_description, view.start_time, view.end_time
+                view.event_title, view.event_description, view.start_time, view.end_time,
+                location=view.location,
             )
         except Exception:
             # Not just HttpError: network/DNS/auth failures raise other types.
@@ -203,7 +214,8 @@ class ConfirmCreateEventButton(discord.ui.Button):
 
         event_id = events_db.create_event(
             google_event_id, view.event_title, view.event_description,
-            view.start_time, view.end_time, view.event_type, "bot", view.created_by
+            view.start_time, view.end_time, view.event_type, "bot", view.created_by,
+            location=view.location,
         )
 
         for offset in view.reminder_offsets:
@@ -218,7 +230,7 @@ class ConfirmCreateEventButton(discord.ui.Button):
 
 class ConfirmSuspiciousDateButton(discord.ui.Button):
 
-    def __init__(self, title, description, start_time, end_time, created_by):
+    def __init__(self, title, description, start_time, end_time, location, created_by):
         super().__init__(
             label="Yes, continue",
             style=discord.ButtonStyle.green
@@ -228,11 +240,12 @@ class ConfirmSuspiciousDateButton(discord.ui.Button):
         self.event_description = description
         self.start_time = start_time
         self.end_time = end_time
+        self.location = location
         self.created_by = created_by
 
     async def callback(self, interaction: discord.Interaction):
         view = EventOptionsView(
-            self.event_title, self.event_description, self.start_time, self.end_time, self.created_by
+            self.event_title, self.event_description, self.start_time, self.end_time, self.location, self.created_by
         )
 
         await interaction.response.edit_message(
@@ -259,21 +272,22 @@ class CancelCreateEventButton(discord.ui.Button):
 
 class ConfirmSuspiciousDateView(SelfCleaningView):
 
-    def __init__(self, title, description, start_time, end_time, created_by):
+    def __init__(self, title, description, start_time, end_time, location, created_by):
         super().__init__(timeout=120)
 
-        self.add_item(ConfirmSuspiciousDateButton(title, description, start_time, end_time, created_by))
+        self.add_item(ConfirmSuspiciousDateButton(title, description, start_time, end_time, location, created_by))
         self.add_item(CancelCreateEventButton())
 
 class EventOptionsView(SelfCleaningView):
 
-    def __init__(self, title, description, start_time, end_time, created_by):
+    def __init__(self, title, description, start_time, end_time, location, created_by):
         super().__init__(timeout=180)
 
         self.event_title = title
         self.event_description = description
         self.start_time = start_time
         self.end_time = end_time
+        self.location = location
         self.created_by = created_by
         self.event_type = "other"
         self.reminder_offsets = []
@@ -293,7 +307,8 @@ class DeleteEventDropdown(discord.ui.Select):
             options.append(
                 discord.SelectOption(
                     label=event[2],
-                    description=f"{event[6]} — {date}",
+                    # Discord caps option descriptions at 100 characters.
+                    description=(f"{event[6]} — {date}" + (f" 📍 {event[10]}" if event[10] else ""))[:100],
                     value=str(event[0])
                 )
             )

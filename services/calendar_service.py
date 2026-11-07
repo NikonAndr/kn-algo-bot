@@ -45,7 +45,7 @@ def list_events(time_min, time_max):
         if not page_token:
             return items
 
-def create_event(title, description, start_time, end_time):
+def create_event(title, description, start_time, end_time, location=""):
     client = get_client()
 
     body = {
@@ -54,6 +54,9 @@ def create_event(title, description, start_time, end_time):
         "start": {"dateTime": start_time.isoformat(), "timeZone": "Europe/Warsaw"},
         "end": {"dateTime": end_time.isoformat(), "timeZone": "Europe/Warsaw"},
     }
+
+    if location:
+        body["location"] = location
 
     created = client.events().insert(calendarId=GOOGLE_CALENDAR_ID, body=body).execute()
 

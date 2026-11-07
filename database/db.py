@@ -61,7 +61,8 @@ def init_db():
         event_type TEXT DEFAULT 'other',
         source TEXT NOT NULL,
         created_by INTEGER,
-        status TEXT DEFAULT 'active'
+        status TEXT DEFAULT 'active',
+        location TEXT
     )
     """)
 
@@ -76,5 +77,19 @@ def init_db():
     )
     """)
 
+    migrate(cursor)
+
     conn.commit()
     conn.close()
+
+def migrate(cursor):
+    # Existing databases predate these changes; CREATE TABLE IF NOT EXISTS
+    # won't alter them. Every step must be safe to run on every start.
+    event_columns = {row[1] for row in cursor.execute("PRAGMA table_info(events)")}
+
+    if "location" not in event_columns:
+        cursor.execute("ALTER TABLE events ADD COLUMN location TEXT")
+
+    cursor.execute(
+        "UPDATE events SET event_type = 'google-calendar' WHERE source = 'calendar' AND event_type = 'other'"
+    )

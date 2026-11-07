@@ -35,6 +35,16 @@ def format_offset(offset_minutes):
     return f"{offset_minutes} minute(s)"
 
 
+def format_reminder(title, offset_minutes, start_time, location):
+    formatted_start = parse_naive_timestamp(start_time).strftime("%d %b %H:%M")
+    message = f"⏰ Reminder: **{title}** starts in {format_offset(offset_minutes)}! ({formatted_start})"
+
+    if location:
+        message += f"\n📍 {location}"
+
+    return message
+
+
 WEEKLY_SEND_WEEKDAY = 6  # Monday=0 ... Sunday=6
 WEEKLY_SEND_HOUR = 18
 
@@ -81,14 +91,11 @@ class SchedulerService:
         channel = self.bot.get_channel(int(CALENDAR_UPDATES_CHANNEL_ID))
         now = warsaw_now()
 
-        for reminder_id, offset_minutes, title, start_time, exec_time in get_due_reminders():
+        for reminder_id, offset_minutes, title, start_time, exec_time, location in get_due_reminders():
             try:
                 if is_within_grace(now, parse_naive_timestamp(exec_time)) and channel:
                     role_mention = f"<@&{MEMBER_ROLE_ID}> " if MEMBER_ROLE_ID else ""
-                    formatted_start = parse_naive_timestamp(start_time).strftime("%d %b %H:%M")
-                    await channel.send(
-                        f"{role_mention}⏰ Reminder: **{title}** starts in {format_offset(offset_minutes)}! ({formatted_start})"
-                    )
+                    await channel.send(role_mention + format_reminder(title, offset_minutes, start_time, location))
 
                 mark_reminder_sent(reminder_id)
             except Exception:

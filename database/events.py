@@ -2,17 +2,17 @@ from datetime import timedelta
 from database.db import get_connection
 from utils.time_helpers import warsaw_now
 
-def create_event(google_event_id, title, description, start_time, end_time, event_type, source, created_by):
+def create_event(google_event_id, title, description, start_time, end_time, event_type, source, created_by, location=""):
 
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         """
-        INSERT INTO events(google_event_id, title, description, start_time, end_time, event_type, source, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO events(google_event_id, title, description, start_time, end_time, event_type, source, created_by, location)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (google_event_id, title, description, start_time, end_time, event_type, source, created_by)
+        (google_event_id, title, description, start_time, end_time, event_type, source, created_by, location)
     )
 
     event_id = cursor.lastrowid
@@ -54,14 +54,14 @@ def get_event(event_id):
 
     return row
 
-def update_event_details(event_id, title, description, start_time, end_time):
+def update_event_details(event_id, title, description, start_time, end_time, location=""):
 
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
-        "UPDATE events SET title = ?, description = ?, start_time = ?, end_time = ? WHERE id = ?",
-        (title, description, start_time, end_time, event_id)
+        "UPDATE events SET title = ?, description = ?, start_time = ?, end_time = ?, location = ? WHERE id = ?",
+        (title, description, start_time, end_time, location, event_id)
     )
 
     conn.commit()
@@ -136,7 +136,7 @@ def get_due_reminders():
 
     cursor.execute(
         """
-        SELECT event_reminders.id, event_reminders.offset_minutes, events.title, events.start_time, event_reminders.exec_time
+        SELECT event_reminders.id, event_reminders.offset_minutes, events.title, events.start_time, event_reminders.exec_time, events.location
         FROM event_reminders
         JOIN events ON events.id = event_reminders.event_id
         WHERE event_reminders.sent = 0

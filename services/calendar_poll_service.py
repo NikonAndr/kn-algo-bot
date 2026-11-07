@@ -72,19 +72,26 @@ class CalendarPollService:
         end_time = parse_event_time(item["end"])
         title = item.get("summary", "Untitled event")
         description = item.get("description", "")
+        location = item.get("location", "")
 
         if not existing:
             event_id = create_event(
                 google_event_id, title, description, start_time, end_time,
-                event_type="other", source="calendar", created_by=None
+                event_type="google-calendar", source="calendar", created_by=None,
+                location=location,
             )
             add_reminder(event_id, DEFAULT_EVENT_REMINDER_MINUTES, start_time - timedelta(minutes=DEFAULT_EVENT_REMINDER_MINUTES))
 
-        elif existing[2] != title or existing[3] != description or existing[4] != str(start_time):
+        elif (
+            existing[2] != title
+            or existing[3] != description
+            or existing[4] != str(start_time)
+            or (existing[10] or "") != location
+        ):
             event_id = existing[0]
             start_changed = existing[4] != str(start_time)
 
-            update_event_details(event_id, title, description, start_time, end_time)
+            update_event_details(event_id, title, description, start_time, end_time, location)
 
             if start_changed:
                 reschedule_reminders(event_id, start_time)
